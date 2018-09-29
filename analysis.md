@@ -9,6 +9,8 @@ library(insuranceData)
 data(dataOhlsson)
 ```
 
+## The data set
+
 The data comes from the former Swedish insurance company Wasa, and
 concerns partial casco insurance, for motorcycles. It contains
 aggregated data on all insurance policies and claims during
@@ -56,19 +58,48 @@ dataOhlsson <- dataOhlsson[dataOhlsson$skadkost>0, ]
 Subsetting the dataset to only include policies with positive claims,
 reduces the dataset from 64548 rows to only 670 rows.
 
+## Density estimates
+
+To estimate the density of the realized claims we use `ggplots` kernel
+density estimate. T uses the fnuction `density()` from the base packages
+`{stats}`. (Sheather and Jones 1991)
+
+``` r
+ggplot(dataOhlsson, aes(skadkost)) +
+  geom_density(alpha=0.2) + geom_rug(aes(x = skadkost, y = 0))
+```
+
+![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
 ``` r
 ggplot(dataOhlsson, aes(skadkost, color=kon, fill=kon)) +
   geom_density(alpha=0.2)
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- --> Comparing
+![](analysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> Comparing
 the distribution of the realized claims, woman have more small claims
 than men and the male claims has heavier
 tails.
 
 ``` r
 ggplot(dataOhlsson, aes(skadkost, color=as.factor(mcklass), fill=as.factor(mcklass))) +
-  geom_density(position='stack')
+  geom_density(alpha=0.1)
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- --> Inspecting
+the density estimates
+
+## References
+
+<div id="refs" class="references">
+
+<div id="ref-sheather_and_jones_1991">
+
+Sheather, Simon J, and Michael C Jones. 1991. “A Reliable Data-Based
+Bandwidth Selection Method for Kernel Density Estimation.” *Journal of
+the Royal Statistical Society. Series B (Methodological)*. JSTOR,
+683–90.
+
+</div>
+
+</div>

@@ -2,6 +2,7 @@
 title: "Motorcycle claims - Wasa insurance 1994 to 1998"
 author: "Christian Duffau-Rasmussen"
 date: "`r Sys.Date()`"
+bibliography: litlist.bib
 output: github_document
 ---
 
@@ -10,6 +11,8 @@ library(ggplot2)
 library(insuranceData)
 data(dataOhlsson)
 ```
+
+## The data set
 
 The data comes from the former Swedish insurance company Wasa, and concerns partial casco insurance, for motorcycles. It contains aggregated data on all insurance policies and claims during 1994-1998.
 
@@ -40,12 +43,24 @@ n.rows.with.claims <- nrow(dataOhlsson)
 ```
 Subsetting the dataset to only include policies with positive claims, reduces the dataset from `r sprintf("%d", n.rows.total)` rows to only `r sprintf("%d", n.rows.with.claims)` rows.
 
+## Density estimates
+
+To estimate the density of the realized claims we use `ggplots` kernel density estimate. T uses the fnuction `density()` from the base packages `{stats}`. [@sheather_and_jones_1991] 
+
+```{r}
+ggplot(dataOhlsson, aes(skadkost)) +
+  geom_density(alpha=0.2) + geom_rug(aes(x = skadkost, y = 0))
+```
+
 ```{r}
 ggplot(dataOhlsson, aes(skadkost, color=kon, fill=kon)) +
   geom_density(alpha=0.2)
 ```
-Comparing the distribution of the realized claims, woman have more small claims than men and the male claims has heavier tails.
+ Comparing the distribution of the realized claims, woman have more small claims than men and the male claims has heavier tails.
 ```{r}
 ggplot(dataOhlsson, aes(skadkost, color=as.factor(mcklass), fill=as.factor(mcklass))) +
   geom_density(alpha=0.1)
 ```
+Inspecting the density estimates
+
+## References
