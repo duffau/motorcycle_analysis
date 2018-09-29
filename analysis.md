@@ -61,8 +61,10 @@ reduces the dataset from 64548 rows to only 670 rows.
 ## Density estimates
 
 To estimate the density of the realized claims we use `ggplots` kernel
-density estimate. T uses the fnuction `density()` from the base packages
-`{stats}`. (Sheather and Jones 1991)
+density estimate. It uses the fnuction `density()` from the base
+packages `{stats}`. The default kernel is Gaussian and the bandwidth is
+chosen to minimize the MSE of the “true” density and the estimated one.
+The procedure is described in (Sheather and Jones 1991).
 
 ``` r
 ggplot(dataOhlsson, aes(skadkost)) +
@@ -87,7 +89,9 @@ ggplot(dataOhlsson, aes(skadkost, color=as.factor(mcklass), fill=as.factor(mckla
 ```
 
 ![](analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- --> Inspecting
-the density estimates
+the density estimates we see that the more powerfull bikes, that is the
+higher indexed motocycles, are more likely to produce more expensive
+damages.
 
 ## References
 
