@@ -6,6 +6,7 @@ output: github_document
 ---
 
 ```{r}
+library(ggplot2)
 library(insuranceData)
 data(dataOhlsson)
 ```
@@ -40,5 +41,11 @@ n.rows.with.claims <- nrow(dataOhlsson)
 Subsetting the dataset to only include policies with positive claims, reduces the dataset from `r sprintf("%d", n.rows.total)` rows to only `r sprintf("%d", n.rows.with.claims)` rows.
 
 ```{r}
-plot(dataOhlsson)
+ggplot(dataOhlsson, aes(skadkost, color=kon, fill=kon)) +
+  geom_density(alpha=0.2)
+```
+Comparing the distribution of the realized claims, woman have more small claims than men and the male claims has heavier tails.
+```{r}
+ggplot(dataOhlsson, aes(skadkost, color=as.factor(mcklass), fill=as.factor(mcklass))) +
+  geom_density(position='stack')
 ```

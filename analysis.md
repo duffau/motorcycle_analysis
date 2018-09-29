@@ -4,6 +4,7 @@ Christian Duffau-Rasmussen
 2018-09-29
 
 ``` r
+library(ggplot2)
 library(insuranceData)
 data(dataOhlsson)
 ```
@@ -56,7 +57,18 @@ Subsetting the dataset to only include policies with positive claims,
 reduces the dataset from 64548 rows to only 670 rows.
 
 ``` r
-plot(dataOhlsson)
+ggplot(dataOhlsson, aes(skadkost, color=kon, fill=kon)) +
+  geom_density(alpha=0.2)
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- --> Comparing
+the distribution of the realized claims, woman have more small claims
+than men and the male claims has heavier
+tails.
+
+``` r
+ggplot(dataOhlsson, aes(skadkost, color=as.factor(mcklass), fill=as.factor(mcklass))) +
+  geom_density(position='stack')
+```
+
+![](analysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
