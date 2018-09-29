@@ -1,8 +1,8 @@
 ---
 title: "Motorcycle claims - Wasa insurance 1994 to 1998"
-author: Christian Duffau-Rasmussen
-output: html_document
+author: "Christian Duffau-Rasmussen"
 date: "`r Sys.Date()`"
+output: github_document
 ---
 
 ```{r}
@@ -10,9 +10,7 @@ library(insuranceData)
 data(dataOhlsson)
 ```
 
-The data for this case study comes from the former Swedish insurance company Wasa, and concerns
-partial casco insurance, for motorcycles this time. It contains aggregated data on all insurance
-policies and claims during 1994-1998.
+The data comes from the former Swedish insurance company Wasa, and concerns partial casco insurance, for motorcycles. It contains aggregated data on all insurance policies and claims during 1994-1998.
 
 ```{r}
 head(dataOhlsson)
