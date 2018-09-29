@@ -47,5 +47,5 @@ ggplot(dataOhlsson, aes(skadkost, color=kon, fill=kon)) +
 Comparing the distribution of the realized claims, woman have more small claims than men and the male claims has heavier tails.
 ```{r}
 ggplot(dataOhlsson, aes(skadkost, color=as.factor(mcklass), fill=as.factor(mcklass))) +
-  geom_density(position='stack')
+  geom_density(alpha=0.1)
 ```
