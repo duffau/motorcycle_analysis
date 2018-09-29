@@ -103,6 +103,7 @@ Sheather, Simon J, and Michael C Jones. 1991. “A Reliable Data-Based
 Bandwidth Selection Method for Kernel Density Estimation.” *Journal of
 the Royal Statistical Society. Series B (Methodological)*. JSTOR,
 683–90.
+<https://www.jstor.org/stable/2345597?seq=1#page_scan_tab_contents>.
 
 </div>
 
