@@ -9,6 +9,7 @@ output: github_document
 ```{r}
 library(ggplot2)
 library(insuranceData)
+library(statmod)
 data(dataOhlsson)
 ```
 
@@ -41,7 +42,7 @@ dataOhlsson <- dataOhlsson[dataOhlsson$skadkost>0, ]
 ```{r, include = FALSE}
 n.rows.with.claims <- nrow(dataOhlsson)
 ```
-Subsetting the dataset to only include policies with positive claims, reduces the dataset from `r sprintf("%d", n.rows.total)` rows to only `r sprintf("%d", n.rows.with.claims)` rows.
+Subsetting the dataset to only include policies with positive claims, reduces the dataset from `r n.rows.total` rows to only `r n.rows.with.claims` rows.
 
 ## Density estimates
 
@@ -63,8 +64,28 @@ ggplot(dataOhlsson, aes(skadkost, color=as.factor(mcklass), fill=as.factor(mckla
 ```
 Inspecting the density estimates we see that the more powerfull bikes, that is the higher indexed motocycles, are more likely to produce more expensive damages.
 
-## Model of number of claims
+## Linear model of claim size
 
+Before estimating/training a model we split the data in test and training set to be able to compute validation metics later on.
 
+```{r}
+set.seed(123)
+test.pct <- 0.15
+mask <- runif(n.rows.with.claims)>test.pct
+train.data <- dataOhlsson[mask, ]
+test.data <- dataOhlsson[!mask, ]
+```
+We reserve `r sprintf("%.0f%%", test.pct*100)` of the data set for testing, so the training set conatians `r nrow(train.data)` observations and the remaining `r nrow(test.data)` observations are used for testing.
+
+```{r}
+model <- lm(skadkost ~ agarald + fordald + kon + factor(zon) + factor(mcklass) + factor(bonuskl) + duration, data=train.data)
+summary(model)
+```
+
+## Poisson model of number of claims
+```{r}
+model <- glm(antskad ~ agarald + fordald + kon + factor(zon) + factor(mcklass) + factor(bonuskl) + duration, data=train.data, family=tweedie(var.power = 1.5))
+summary(model)
+```
 
 ## References
