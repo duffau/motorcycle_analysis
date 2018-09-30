@@ -63,4 +63,8 @@ ggplot(dataOhlsson, aes(skadkost, color=as.factor(mcklass), fill=as.factor(mckla
 ```
 Inspecting the density estimates we see that the more powerfull bikes, that is the higher indexed motocycles, are more likely to produce more expensive damages.
 
+## Model of number of claims
+
+
+
 ## References
