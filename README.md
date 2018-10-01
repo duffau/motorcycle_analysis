@@ -15,6 +15,7 @@ in a `R` console.
 
 ```r
 install.package("rmarkdown")
-install.package("ggplot2")
 install.package("insuranceData")
+install.package("ROCR")
+install.package("adabag")
 ```
