@@ -8,6 +8,7 @@ library(ggplot2)
 library(insuranceData)
 library(ROCR)
 library(adabag)
+library(rpart.plot)
 data(dataOhlsson)
 ```
 
@@ -175,6 +176,25 @@ performance.logistic_reg <- performance(pr, measure = "tpr", x.measure = "fpr")
 auc.logistic_reg <- performance(pr, measure = "auc")@y.values[[1]]
 ```
 
+## CART Decision Tree
+
+See details in (Hastie, Tibshirani, and Friedman 2009, Section 9.2,
+pp. 305).
+
+``` r
+model <- rpart(has_claim ~ agarald + kon + factor(zon) + factor(mcklass) + fordald + factor(bonuskl) + duration, data=train.data, method='class',control=rpart.control(minsplit=20, cp=0.0001))
+rpart.plot::prp(model,main="Classification Tree for Claims")
+```
+
+![](analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+p <- predict(model, newdata=test.data, type="prob")[,2]
+pr <- prediction(p, test.data$has_claim)
+performance.cart_tree <- performance(pr, measure = "tpr", x.measure = "fpr")
+auc.cart_tree <- performance(pr, measure = "auc")@y.values[[1]]
+```
+
 ## AdaBoost.M1
 
 The AdaBoost.M1 is a learning algorithm which trains a sequence of *M*
@@ -194,7 +214,7 @@ par(mar = c(2, 7, 2, 1) + 0.2)
 barplot(sort(model$importance), horiz=T, las=2, main="Variable importance")
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 p <- adabag::predict.boosting(model, newdata=test.data)$prob[,2]
@@ -207,11 +227,12 @@ auc.adaboost <- performance(pr, measure = "auc")@y.values[[1]]
 
 ``` r
 plot(performance.logistic_reg)
-lines(performance.adaboost@x.values[[1]], performance.adaboost@y.values[[1]], col=2, new=T)
-legend(1,0, c('logistic regression', 'Adaboost.M1'), lwd=1, col=1:2, xjust=1, yjust=0)
+lines(performance.cart_tree@x.values[[1]], performance.cart_tree@y.values[[1]], col=2, new=T)
+lines(performance.adaboost@x.values[[1]], performance.adaboost@y.values[[1]], col=3, new=T)
+legend(1,0, c('logistic regression', 'CART decision tree', 'Adaboost.M1'), lwd=1, col=1:3, xjust=1, yjust=0)
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 data.frame(auc.logistic_reg, auc.adaboost)
