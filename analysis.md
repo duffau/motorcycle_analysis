@@ -7,18 +7,7 @@ Christian Duffau-Rasmussen
 library(ggplot2)
 library(insuranceData)
 library(ROCR)
-```
-
-    ## Loading required package: gplots
-
-    ## 
-    ## Attaching package: 'gplots'
-
-    ## The following object is masked from 'package:stats':
-    ## 
-    ##     lowess
-
-``` r
+library(adabag)
 data(dataOhlsson)
 ```
 
@@ -65,21 +54,24 @@ The variables are:
 ## Claim classifier
 
 We would like classify which policies would experience claims and which
-will not. So first we define the variable “has\_claim”.
+will not. So first we define the variable “has\_claim”. The models used
+are all desribed in detail in Elements of Statistical Learning (Hastie,
+Tibshirani, and Friedman 2009).
 
 ``` r
 dataOhlsson[,"has_claim"] <- factor(dataOhlsson$antskad>0)
 ```
 
 ``` r
-table(dataOhlsson$has_claim)/nrow(dataOhlsson)
+proportion <- table(dataOhlsson$has_claim)/nrow(dataOhlsson)
+proportion
 ```
 
     ## 
     ##      FALSE       TRUE 
     ## 0.98962013 0.01037987
 
-We see that claims are very rare and only 1% of all policies have
+We see that claims are very rare and only 1.04% of all policies have
 claims.
 
 ``` r
@@ -92,10 +84,13 @@ test.data <- dataOhlsson[!mask, ]
 
 We reserve approximately 50% of the data set for testing, so the
 training set conatians 31937 observations and the remaining 32611
-observations are used for
-testing.
+observations are used for testing.
 
 ## Logistic regression
+
+Losgistic regression is a classic technique for classification. For
+details see (Hastie, Tibshirani, and Friedman 2009, Section 4.4,
+pp. 119).
 
 ``` r
 model <- glm(has_claim ~ agarald + kon + factor(zon) + factor(mcklass) + fordald + factor(bonuskl) + duration, family=binomial(link='logit'), data=train.data)
@@ -176,18 +171,74 @@ anova(model, test='Chisq')
 ``` r
 p <- predict(model, newdata=test.data, type="response")
 pr <- prediction(p, test.data$has_claim)
-prf <- performance(pr, measure = "tpr", x.measure = "fpr")
-plot(prf)
+performance.logistic_reg <- performance(pr, measure = "tpr", x.measure = "fpr")
+auc.logistic_reg <- performance(pr, measure = "auc")@y.values[[1]]
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+## AdaBoost.M1
+
+The AdaBoost.M1 is a learning algorithm which trains a sequence of *M*
+descision trees, where the datapoints for training tree number *m* are
+weighted according to the predicion accuracy of the previously trained
+tree (*m-1*). The observations which are correctly classified by the
+prvious tree get a low weight in the next tree, and predictions which
+where wrongly classified get a high weight. This way each tree learns
+different aspects of the feature space, and perform better in practice.
+The algorithm was first formulated in (Freund and Schapire 1997) and is
+described in (Hastie, Tibshirani, and Friedman 2009, Section 10.1,
+pp. 339).
 
 ``` r
-auc <- performance(pr, measure = "auc")
-auc <- auc@y.values[[1]]
-auc
+model <- adabag::boosting(has_claim ~ agarald + kon + factor(zon) + factor(mcklass) + fordald + factor(bonuskl) + duration, data=train.data, mfinal=100, boos=F, coeflearn='Freund')
+par(mar = c(2, 7, 2, 1) + 0.2)
+barplot(sort(model$importance), horiz=T, las=2, main="Variable importance")
 ```
 
-    ## [1] 0.7699444
+![](analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+p <- adabag::predict.boosting(model, newdata=test.data)$prob[,2]
+pr <- prediction(p, test.data$has_claim)
+performance.adaboost <- performance(pr, measure = "tpr", x.measure = "fpr")
+auc.adaboost <- performance(pr, measure = "auc")@y.values[[1]]
+```
+
+## Model performances
+
+``` r
+plot(performance.logistic_reg)
+lines(performance.adaboost@x.values[[1]], performance.adaboost@y.values[[1]], col=2, new=T)
+legend(1,0, c('logistic regression', 'Adaboost.M1'), lwd=1, col=1:2, xjust=1, yjust=0)
+```
+
+![](analysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+``` r
+data.frame(auc.logistic_reg, auc.adaboost)
+```
+
+    ##   auc.logistic_reg auc.adaboost
+    ## 1        0.7699444    0.7413902
 
 ## References
+
+<div id="refs" class="references">
+
+<div id="ref-freund1997decision">
+
+Freund, Yoav, and Robert E Schapire. 1997. “A Decision-Theoretic
+Generalization of on-Line Learning and an Application to Boosting.”
+*Journal of Computer and System Sciences* 55 (1). Elsevier: 119–39.
+
+</div>
+
+<div id="ref-elements_of_statistical_learning">
+
+Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. *The
+Elements of Statistical Learning: Data Mining, Inference and
+Prediction*. 2nd ed. Springer.
+<http://www-stat.stanford.edu/~tibs/ElemStatLearn/>.
+
+</div>
+
+</div>

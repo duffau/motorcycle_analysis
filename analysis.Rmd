@@ -6,10 +6,11 @@ bibliography: litlist.bib
 output: github_document
 ---
 
-```{r}
+```{r, message=FALSE}
 library(ggplot2)
 library(insuranceData)
 library(ROCR)
+library(adabag)
 data(dataOhlsson)
 ```
 
@@ -35,16 +36,17 @@ The variables are:
 
 ## Claim classifier
 
-We would like classify which policies would experience claims and which will not. So first we define the variable "has_claim".
+We would like classify which policies would experience claims and which will not. So first we define the variable "has_claim". The models used are all desribed in detail in Elements of Statistical Learning [@elements_of_statistical_learning].
 
 ```{r}
 dataOhlsson[,"has_claim"] <- factor(dataOhlsson$antskad>0)
 ```
 
 ```{r}
-table(dataOhlsson$has_claim)/nrow(dataOhlsson)
+proportion <- table(dataOhlsson$has_claim)/nrow(dataOhlsson)
+proportion
 ```
-We see that claims are very rare and only 1% of all policies have claims.
+We see that claims are very rare and only `r sprintf("%.2f%%", proportion[2]*100)` of all policies have claims.
 
 ```{r}
 set.seed(123)
@@ -58,6 +60,8 @@ We reserve approximately `r sprintf("%.0f%%", test.pct*100)` of the data set for
 
 ## Logistic regression
 
+Losgistic regression is a classic technique for classification. For details see [@elements_of_statistical_learning, Section 4.4, pp. 119].
+
 ```{r}
 model <- glm(has_claim ~ agarald + kon + factor(zon) + factor(mcklass) + fordald + factor(bonuskl) + duration, family=binomial(link='logit'), data=train.data)
 summary(model)
@@ -69,16 +73,35 @@ anova(model, test='Chisq')
 ```{r}
 p <- predict(model, newdata=test.data, type="response")
 pr <- prediction(p, test.data$has_claim)
-prf <- performance(pr, measure = "tpr", x.measure = "fpr")
-plot(prf)
+performance.logistic_reg <- performance(pr, measure = "tpr", x.measure = "fpr")
+auc.logistic_reg <- performance(pr, measure = "auc")@y.values[[1]]
+```
+
+## AdaBoost.M1
+The AdaBoost.M1 is a learning algorithm which trains a sequence of _M_ descision trees, where the datapoints for training tree number _m_ are weighted according to the predicion accuracy of the previously trained tree (_m-1_). The observations which are correctly classified by the prvious tree get a low weight in the next tree, and predictions which where wrongly classified get a high weight. This way each tree learns different aspects of the feature space, and perform better in practice. The algorithm was first formulated in [@freund1997decision] and is described in [@elements_of_statistical_learning, Section 10.1, pp. 339].
+
+```{r}
+model <- adabag::boosting(has_claim ~ agarald + kon + factor(zon) + factor(mcklass) + fordald + factor(bonuskl) + duration, data=train.data, mfinal=100, boos=F, coeflearn='Freund')
+par(mar = c(2, 7, 2, 1) + 0.2)
+barplot(sort(model$importance), horiz=T, las=2, main="Variable importance")
 ```
 
 ```{r}
-auc <- performance(pr, measure = "auc")
-auc <- auc@y.values[[1]]
-auc
+p <- adabag::predict.boosting(model, newdata=test.data)$prob[,2]
+pr <- prediction(p, test.data$has_claim)
+performance.adaboost <- performance(pr, measure = "tpr", x.measure = "fpr")
+auc.adaboost <- performance(pr, measure = "auc")@y.values[[1]]
 ```
 
+## Model performances
 
+```{r}
+plot(performance.logistic_reg)
+lines(performance.adaboost@x.values[[1]], performance.adaboost@y.values[[1]], col=2, new=T)
+legend(1,0, c('logistic regression', 'Adaboost.M1'), lwd=1, col=1:2, xjust=1, yjust=0)
+```
 
+```{r}
+data.frame(auc.logistic_reg, auc.adaboost)
+```
 ## References
