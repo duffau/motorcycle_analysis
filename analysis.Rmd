@@ -36,8 +36,4 @@ The variables are:
 
 ## TDBoost
 
-```{r}
-??TDboost::
-```
-
 ## References
