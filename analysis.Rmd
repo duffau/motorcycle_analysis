@@ -6,7 +6,7 @@ bibliography: litlist.bib
 output: github_document
 ---
 
-```{r}
+```{r, warning=FALSE}
 library(ggplot2)
 library(insuranceData)
 library(TDboost)
