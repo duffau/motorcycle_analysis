@@ -1,7 +1,7 @@
 Motorcycle claims - Wasa insurance 1994 to 1998
 ================
 Christian Duffau-Rasmussen
-2018-10-01
+2018-10-18
 
 ``` r
 library(ggplot2)
