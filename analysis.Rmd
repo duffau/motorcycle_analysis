@@ -33,6 +33,18 @@ The variables are:
 - `antskad` the number of claims, a numeric vector
 - `skadkost` the claim cost, a numeric vector
 
+## Linear regression
+
+```{r}
+lm_model <- lm(skadkost ~ agarald + fordald + kon + factor(zon) + factor(mcklass) + factor(bonuskl) + duration, data=train.data)
+summary(lm_model)
+```
+
+## Tweedie model of number of claims
+```{r}
+tweedie_model <- glm(skadcost ~ agarald + fordald + kon + factor(zon) + factor(mcklass) + factor(bonuskl) + duration, data=train.data, family=tweedie(var.power = 1.5))
+summary(tweedie_model)
+```
 
 ## TDBoost
 
