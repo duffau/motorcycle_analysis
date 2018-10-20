@@ -9,6 +9,7 @@ output: github_document
 ```{r, warning=FALSE}
 library(ggplot2)
 library(insuranceData)
+library(statmod)
 library(TDboost)
 data(dataOhlsson)
 ```
@@ -36,16 +37,22 @@ The variables are:
 ## Linear regression
 
 ```{r}
-lm_model <- lm(skadkost ~ agarald + fordald + kon + factor(zon) + factor(mcklass) + factor(bonuskl) + duration, data=train.data)
+lm_model <- lm(skadkost ~ agarald + fordald + kon + factor(zon) + factor(mcklass) + factor(bonuskl) + duration, data=dataOhlsson)
 summary(lm_model)
 ```
 
 ## Tweedie model of number of claims
 ```{r}
-tweedie_model <- glm(skadcost ~ agarald + fordald + kon + factor(zon) + factor(mcklass) + factor(bonuskl) + duration, data=train.data, family=tweedie(var.power = 1.5))
+tweedie_model <- glm(skadkost ~ agarald + fordald + kon + factor(zon) + factor(mcklass) + factor(bonuskl) + duration, data=dataOhlsson, family=statmod::tweedie(var.power = 1.5))
 summary(tweedie_model)
 ```
 
 ## TDBoost
+```{r}
+tdboost_model <- TDboost(skadkost ~ agarald + fordald + kon + factor(zon) + factor(mcklass) + factor(bonuskl) + duration, 
+                         data=dataOhlsson,
+                         distribution= list(name="EDM", alpha=1.5))
+summary(tdboost_model, plotit=FALSE)
+```
 
 ## References
